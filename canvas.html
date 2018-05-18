@@ -4,25 +4,46 @@
 	<head>
 		<meta charset="UTF-8">
 		<title></title>
+		<style>
+		*{
+			margin:0;padding:0;
+		}
+			a{
+				display:inline-block;
+				padding:10px;
+				background:#007AFF;
+				line-height:20px;
+				color:#fff;
+				border-radius:5px;
+			}
+			.button{
+				margin-left: 50px;
+			}
+		</style>
 	</head>
 
 	<body>
+		 <div class="button">
+			<a id="back">回退</a>
+			<a id="clear">清除</a>
+			<a id="save">保存</a>
+		 </div>
+		<div>
+			<canvas id="canvas"></canvas>
+		</div>
 		<script>
-			window.onload = function() {
-				var div =document.createElement('div');
-				var canvas = document.createElement('canvas');
-				canvas.id = 'canca';
+				var canvas = document.getElementById('canvas');
 				canvas.width=400;
 				canvas.height=400;
-				div.appendChild(canvas);
-				document.body.appendChild(div);
 				var context = canvas.getContext('2d');
 				context.lineWidth = 2;
 				var point = {};
+				let data=[];
 				var rects = canvas.getBoundingClientRect();
 				var paint = (signal) => {
 					switch(signal) {
 						case 1: // 开始路径
+						data.push(context.getImageData(0,0,canvas.width,canvas.height));
 							context.beginPath();
 							context.moveTo(point.x, point.y);
 						case 2: // 前面之所以没有break语句，是为了点击时就能描画出一个点
@@ -34,7 +55,6 @@
 				var isMobile = /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i.test(navigator.userAgent);
 				let pressed = false; // 标示是否发生鼠标按下或者手指按下事件
 				var create = signal => (e) => {
-					console.log(signal);
 					if(signal === 1) {
 						pressed = true;
 					}
@@ -65,7 +85,19 @@
 						});
 					});
 				}
-			}
+				//回退、清除、保存事件
+				document.getElementById('back').addEventListener('click',function(){
+					if(data.length){
+    		             context.putImageData(data[data.length-1],0,0);
+    		             data.pop();
+    	            }
+				})
+				document.getElementById('clear').addEventListener('click',function(){
+					context.clearRect(0,0,canvas.width,canvas.height);
+				})
+				document.getElementById('save').addEventListener('click',function(){
+					
+				})
 		</script>
 	</body>
 
