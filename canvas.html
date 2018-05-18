@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+	</head>
+
+	<body>
+		<script>
+			window.onload = function() {
+				var div =document.createElement('div');
+				var canvas = document.createElement('canvas');
+				canvas.id = 'canca';
+				canvas.width=400;
+				canvas.height=400;
+				div.appendChild(canvas);
+				document.body.appendChild(div);
+				var context = canvas.getContext('2d');
+				context.lineWidth = 2;
+				var point = {};
+				var rects = canvas.getBoundingClientRect();
+				var paint = (signal) => {
+					switch(signal) {
+						case 1: // 开始路径
+							context.beginPath();
+							context.moveTo(point.x, point.y);
+						case 2: // 前面之所以没有break语句，是为了点击时就能描画出一个点
+							context.lineTo(point.x, point.y);
+							context.stroke();
+							break;
+					}
+				};
+				var isMobile = /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i.test(navigator.userAgent);
+				let pressed = false; // 标示是否发生鼠标按下或者手指按下事件
+				var create = signal => (e) => {
+					console.log(signal);
+					if(signal === 1) {
+						pressed = true;
+					}
+					if(signal === 1 || pressed) {
+						e = isMobile ? e.touches[0] : e;
+						point.x = e.clientX - rects.left + 0.5; // 不加0.5，整数坐标处绘制直线，直线宽度将会多1px(不理解的不妨谷歌下)
+						point.y = e.clientY - rects.top + 0.5;
+						paint(signal);
+					}
+				};
+				var start = create(1);
+				var move = create(2);
+				var requestAnimationFrame = window.requestAnimationFrame;
+				var optimizedMove = requestAnimationFrame ? (e) => {
+					requestAnimationFrame(() => {
+						move(e);
+					});
+				} : move;
+				if(isMobile) {
+					canvas.addEventListener('touchstart', start);
+					canvas.addEventListener('touchmove', optimizedMove);
+				} else {
+					canvas.addEventListener('mousedown', start);
+					canvas.addEventListener('mousemove', optimizedMove);
+					['mouseup', 'mouseleave'].forEach((event) => {
+						canvas.addEventListener(event, () => {
+							pressed = false;
+						});
+					});
+				}
+			}
+		</script>
+	</body>
+
+</html>
